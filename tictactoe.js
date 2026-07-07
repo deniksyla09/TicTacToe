@@ -71,17 +71,84 @@ function checkForWinner() {
 }
 
 function newGame() {
-	// TODO: Complete the function
+	 // Clear out active timeouts safely
+     clearTimeout(computerMoveTimeout);
+     computerMoveTimeout = 0;
+ 
+     // Reset all buttons to default clickable options
+     const buttons = getGameBoardButtons();
+     for (let button of buttons) {
+         button.innerHTML = "";
+         button.className = "";
+         button.disabled = false;
+     }
+ 
+     // Set human player to start
+     playerTurn = true;
+     document.getElementById("turnInfo").textContent = "Your turn";
 }
 
 function boardButtonClicked(button) {
-	// TODO: Complete the function
+	if (playerTurn) {
+        button.innerHTML = "X";
+        button.classList.add("x");
+        button.disabled = true;
+        switchTurn();
+    }
 }
 
 function switchTurn() {
-	// TODO: Complete the function
+	 // 1. Check for winner or draw status
+     const status = checkForWinner();
+
+     // 2. Handle Game Over States
+     if (status !== gameStatus.MORE_MOVES_LEFT) {
+         playerTurn = false; // Freeze further clicks
+         const turnInfo = document.getElementById("turnInfo");
+ 
+         if (status === gameStatus.HUMAN_WINS) {
+             turnInfo.textContent = "You win!";
+         } else if (status === gameStatus.COMPUTER_WINS) {
+             turnInfo.textContent = "Computer wins!";
+         } else if (status === gameStatus.DRAW_GAME) {
+             turnInfo.textContent = "Draw game";
+         }
+         return; // Break out immediately
+     }
+ 
+     // 3. Toggle Turn if Game is Continuing
+     playerTurn = !playerTurn;
+     const turnInfo = document.getElementById("turnInfo");
+ 
+     if (playerTurn) {
+         turnInfo.textContent = "Your turn";
+     } else {
+         turnInfo.textContent = "Computer's turn";
+         // Simulate thinking time (1 second) before computer plays
+         computerMoveTimeout = setTimeout(makeComputerMove, 1000);
+     }
 }
 
 function makeComputerMove() {
-	// TODO: Complete the function
+	const buttons = getGameBoardButtons();
+    const availableChoices = [];
+
+    // Collate all buttons that haven't been clicked yet
+    for (let i = 0; i < buttons.length; i++) {
+        if (buttons[i].innerHTML !== "X" && buttons[i].innerHTML !== "O") {
+            availableChoices.push(buttons[i]);
+        }
+    }
+
+    // Pick a random index from remaining grid squares
+    if (availableChoices.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableChoices.length);
+        const chosenButton = availableChoices[randomIndex];
+
+        chosenButton.innerHTML = "O";
+        chosenButton.classList.add("o");
+        chosenButton.disabled = true;
+
+        switchTurn();
+    }
 }
